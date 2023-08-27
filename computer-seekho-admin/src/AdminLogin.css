@@ -1,0 +1,19 @@
+
+.adminlogin{
+    text-align: right;
+  }
+  .admin{
+    width: 400px;
+     
+  }
+  .login{
+    
+    margin-top: 4em;
+    margin-left: 25em;
+    padding-top: 2.5em;
+    padding-left: 3em;
+    width: 500px;
+    height: 500px;
+    background-color: rgb(228, 217, 217);
+    border-radius: 0.5em;
+  } 

@@ -1,0 +1,126 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ComputerSeekho.Model;
+
+namespace ComputerSeekho.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class EnquiriesController : ControllerBase
+    {
+        private readonly ComputerSeekhoContext _context;
+
+        public EnquiriesController(ComputerSeekhoContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/Enquiries
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Enquiry>>> GetEnquiry()
+        {
+          if (_context.Enquiry == null)
+          {
+              return NotFound();
+          }
+            return await _context.Enquiry.ToListAsync();
+        }
+
+        // GET: api/Enquiries/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Enquiry>> GetEnquiry(int id)
+        {
+          if (_context.Enquiry == null)
+          {
+              return NotFound();
+          }
+            // var enquiry = await _context.Enquiry.FindAsync(id);
+
+            var q = from enq in _context.Enquiry
+                    where enq.EnquiryId == id
+                    select enq;
+
+
+            return Ok(q.ToList());
+
+        }
+
+       
+
+        // PUT: api/Enquiries/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutEnquiry(int id, Enquiry enquiry)
+        {
+            if (id != enquiry.EnquiryId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(enquiry).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EnquiryExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Enquiries
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Enquiry>> PostEnquiry(Enquiry enquiry)
+        {
+          if (_context.Enquiry == null)
+          {
+              return Problem("Entity set 'ComputerSeekhoContext.Enquiry'  is null.");
+          }
+            _context.Enquiry.Add(enquiry);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetEnquiry", new { id = enquiry.EnquiryId }, enquiry);
+        }
+
+        // DELETE: api/Enquiries/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEnquiry(int id)
+        {
+            if (_context.Enquiry == null)
+            {
+                return NotFound();
+            }
+            var enquiry = await _context.Enquiry.FindAsync(id);
+            if (enquiry == null)
+            {
+                return NotFound();
+            }
+
+            _context.Enquiry.Remove(enquiry);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool EnquiryExists(int id)
+        {
+            return (_context.Enquiry?.Any(e => e.EnquiryId == id)).GetValueOrDefault();
+        }
+    }
+}

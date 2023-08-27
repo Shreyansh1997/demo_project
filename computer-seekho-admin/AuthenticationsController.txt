@@ -1,0 +1,133 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ComputerSeekho.Model;
+using NuGet.Protocol.Plugins;
+
+namespace ComputerSeekho.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthenticationsController : ControllerBase
+    {
+        private readonly ComputerSeekhoContext _context;
+
+        public AuthenticationsController(ComputerSeekhoContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/Authentications
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Authentication>>> GetAuthentication()
+        {
+          if (_context.Authentication == null)
+          {
+              return NotFound();
+          }
+            return await _context.Authentication.ToListAsync();
+        }
+
+        // GET: api/Authentications/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Authentication>> GetAuthentication(int id)
+        {
+          if (_context.Authentication == null)
+          {
+              return NotFound();
+          }
+            var authentication = await _context.Authentication.FindAsync(id);
+
+            if (authentication == null)
+            {
+                return NotFound();
+            }
+
+            return authentication;
+        }
+
+        // PUT: api/Authentications/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAuthentication(int id, Authentication authentication)
+        {
+            if (id != authentication.AuthenticationId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(authentication).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AuthenticationExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Authentications
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Authentication>> PostAuthentication(Authentication authentication)
+        {
+          if (authentication == null)
+          {
+              return Problem("Enter Data to login");
+            }
+            var user = await _context.Authentication.FirstOrDefaultAsync((user) => user.UserName == authentication.UserName && user.Password == authentication.Password);
+            if (user == null)
+            {
+                return BadRequest("User not valid");
+            }
+            else
+                if (authentication.UserName.Equals(user.UserName) && authentication.Password.Equals(user.Password))
+            {
+                return Ok(user);
+            }
+
+            return BadRequest("Invalid Userid. OR Password");
+
+        }
+
+        // DELETE: api/Authentications/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAuthentication(int id)
+        {
+            if (_context.Authentication == null)
+            {
+                return NotFound();
+            }
+            var authentication = await _context.Authentication.FindAsync(id);
+            if (authentication == null)
+            {
+                return NotFound();
+            }
+
+            _context.Authentication.Remove(authentication);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool AuthenticationExists(int id)
+        {
+            return (_context.Authentication?.Any(e => e.AuthenticationId == id)).GetValueOrDefault();
+        }
+    }
+}
